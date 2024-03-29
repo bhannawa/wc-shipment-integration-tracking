@@ -4,7 +4,7 @@
  * Plugin Name: Shipment Integration Tracking
  * Text Domain: wc-shipment-integration-tracking
  * Description: Checks order notes for tracking numbers and adds to AST shipment tracking field
- * Version: 2.0.0
+ * Version: 2.1.0
  */
 
 /* Protect php code */
@@ -61,5 +61,29 @@ function init_shipment_tracking_integration() {
 
         // Actually set tracking number with AST
         ast_insert_tracking_number($order_id, $tracking_number, $tracking_provider, $status_shipped );
+    };
+    
+
+    function ast_custom_delete_tracking_items( $order_id ) {
+        //check if AST is active
+        if ( !function_exists( 'ast_get_tracking_items' ) ) return;
+
+        $ast_custom = WC_Advanced_Shipment_Tracking_Actions::get_instance();
+
+        $tracking_items = ast_get_tracking_items( $order_id );
+
+        foreach ( $tracking_items as $tracking_item ) {
+            $tracking_id = $tracking_item['tracking_id'];
+            $ast_custom->delete_tracking_item( $order_id, $tracking_id );
+        }
+    }
+
+    // Check note for Pirate Ship cancelled note and remove from AST
+    add_action( 'woocommerce_rest_insert_order_note', 'check_note_for_delete_tracking', 10, 3 );
+    function check_note_for_delete_tracking( $note, $request, $true ) {
+        if( strpos( $note->comment_content, 'Order shipment has been canceled' ) !== false ){
+            $order_id = $request['order_id'];
+            ast_custom_delete_tracking_items( $order_id );
+        }
     };
 }
