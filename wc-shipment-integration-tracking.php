@@ -4,7 +4,8 @@
  * Plugin Name: Shipment Integration Tracking
  * Text Domain: wc-shipment-integration-tracking
  * Description: Checks order notes for tracking numbers and adds to AST shipment tracking field
- * Version: 2.1.0
+ * Version: 2.1.1
+ * Requires Plugins: woo-advanced-shipment-tracking
  */
 
 /* Protect php code */
